@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Hi Sponsor, {{user}}</h2>
+        <a href="/logout" class="btn btn-danger">Logout</a>
+    </div>
+
+
+    <h2>Search for Influencers</h2>
+    <form action="/sponsor_dashboard" method="GET" class="form-inline mb-4">
+        <input type="text" name="search_query" placeholder="Search Influencers by Name" class="form-control mr-2">
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {% if search_results %}
+    <h3>Search Results:</h3>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Influencer ID</th>
+                <th>Influencer Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for influencer in search_results %}
+                <tr>
+                    <td>{{ influencer.id }}</td>
+                    <td>{{ influencer.name }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="2">No influencers found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+
+    <h2>Existing Campaigns</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Budget</th>
+                <th>Individual Pay</th>
+                <th>Visibility</th>
+                <th>Goals</th>
+                <th>Update/Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for campaign in campaigns %}
+                <tr>
+                    <td>{{ campaign.name }}</td>
+                    <td>{{ campaign.description }}</td>
+                    <td>{{ campaign.start_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ campaign.end_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ campaign.budget }}</td>
+                    <td>{{campaign.ind_pay}}</td>
+                    <td>{{ campaign.visibility }}</td>
+                    <td>{{ campaign.goals }}</td>
+                    <td>
+                        <form action="/update_campaign/{{campaign.id}}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-warning btn-sm">Update</button>
+                        </form>
+                        <form action="/delete_campaign/{{campaign.id}}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="9">No campaigns found</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Existing Ad Requests</h1>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Requirements</th>
+                <th>Payment Amount</th>
+                <th>Status</th>
+                <th>Campaign</th>
+                <th>Influencer</th>
+                <th>Update/delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in all_req %}
+                <tr>
+                    <td>{{ req.requirements }}</td>
+                    <td>{{ req.payment_amount }}</td>
+                    <td>{{ req.status }}</td>
+                    <td>{{ req.campaign_id }}</td>  
+                    <td>{{ req.influencer_id }}</td>
+                     <td>
+                        <form  method="post" class="d-inline">
+                            <button type="submit" class="btn btn-warning btn-sm">Update</button>
+                        </form>
+                        <form action="/delete/{{req.id}}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">No ad requests found</td>
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h1>Requests from Influencers</h1>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Ad Request ID</th>
+                <th>Requested Amount</th>
+                <th>Campaign</th>
+                <th>Influencer</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in req_from_inf %}
+            <tr>
+                <td>{{ req.ad_request_id }}</td>
+                <td>{{ req.req_amount }}</td>
+                <td>{{req.ad_request.campaign_id}} {{req.ad_request.campaign.name}}</td>
+                <td>{{req.ad_request.influencer_id}} {{req.ad_request.influencer.name}}</td>
+                <td>{{req.ad_request.status}}</td>
+                {% if req.ad_request.status == 'pending' %}
+                <td>
+                    <form action="/accept_sp" method="post" class="d-inline">
+                        <input type="hidden" name="new_amount" value="{{req.req_amount}}">
+                        <input type="hidden" name="ad_request_id" value="{{ req.ad_request_id }}">
+                        <button type="submit" name="status" value="Accepted" class="btn btn-success btn-sm">Accept</button>
+                    </form>
+                    <form action="/reject_sp" method="post" class="d-inline">
+                        <input type="hidden" name="ad_request_id" value="{{ req.ad_request_id }}">
+                        <button type="submit" name="status" value="Rejected" class="btn btn-danger btn-sm">Reject</button>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h1>Create a New Ad Request</h1>
+    <form action="{{ url_for('create_adreq') }}" method="post">
+        <div class="form-group">
+            <label for="requirements">Requirements:</label>
+            <textarea id="requirements" name="requirements" class="form-control" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="payment_amount">Payment Amount:</label>
+            <input type="number" id="payment_amount" name="payment_amount" step="0.01" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="campaign_id">Campaign:</label>
+            <select id="campaign_id" name="campaign_id" class="form-control" required>
+                {% for campaign in campaigns %}
+                    <option value="{{ campaign.id }}">{{ campaign.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="influencer_id">Influencer:</label>
+            <select id="influencer_id" name="influencer_id" class="form-control" required>
+                {% for influencer in influencers %}
+                    <option value="{{ influencer.id }}">{{influencer.id}}   {{ influencer.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Ad Request</button>
+    </form>
+    
+    <h1>Create a New Campaign</h1>
+    <form action="{{ url_for('sponsor_dashboard') }}" method="post">
+        <div class="form-group">
+            <label for="name">Campaign Name:</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" class="form-control" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="budget">Budget:</label>
+            <input type="number" id="budget" name="budget" step="0.01" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ind_pay">Individual Pay:</label>
+            <input type="number" id="ind_pay" name="ind_pay" step="0.01" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+            <label for="visibility">Visibility:</label>
+            <select id="visibility" name="visibility" class="form-control" required>
+                <option value="public">Public</option>
+                <option value="private">Private</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="goals">Goals:</label>
+              <input type="text" id="goals" name="goals" class="form-control" required>
+        </div>
+         <button type="submit" class="btn btn-primary">Create campaign</button>
+    </form>
+</body>
+</html>
+
+
+
+           

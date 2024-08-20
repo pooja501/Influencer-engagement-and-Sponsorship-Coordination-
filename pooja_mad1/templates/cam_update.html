@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update this Campaign</title>
+</head>
+<body>
+    <h1>Update this Campaign</h1>
+    
+    <form action="{{ url_for('update_campaign', id=campaign.id) }}" method="post">
+        <label for="name">Campaign Name:</label>
+        <input type="text" id="name" required  name="name" "><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" required name="description"></textarea><br>
+
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" required name="start_date" ><br>
+
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" required  name="end_date" "><br>
+
+        <label for="budget">Budget:</label>
+        <input type="number" id="budget" required name="budget" step="0.01" ><br>
+
+        <label for="ind_pay">Individual Pay:</label>
+        <input type="number" id="ind_pay" required  name="ind_pay" step="0.01" ><br>
+
+        <label for="visibility">Visibility:</label>
+        <select id="visibility" name="visibility">
+            <option value="public" {% if campaign.visibility == 'public' %}selected{% endif %}>Public</option>
+            <option value="private" {% if campaign.visibility == 'private' %}selected{% endif %}>Private</option>
+        </select><br>
+
+        <label for="goals">Goals:</label>
+        <textarea id="goals" name="goals"></textarea><br>
+
+        <input type="hidden" name="campaign_id" >
+
+        <button type="submit">Update Campaign</button>
+    </form>
+    
+</body>
+</html>

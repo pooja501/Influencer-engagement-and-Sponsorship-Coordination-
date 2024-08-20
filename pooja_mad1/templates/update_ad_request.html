@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Ad Request</title>
+</head>
+<body>
+    <h2>Update Ad Request</h2>
+
+    <form action="{{ url_for('update_ad_request', ad_request_id=ad_request.id) }}" method="POST">
+        <label for="requirements">Requirements:</label><br>
+        <textarea id="requirements" name="requirements">{{ ad_request.requirements }}</textarea><br><br>
+
+        <label for="payment_amount">Payment Amount:</label><br>
+        <input type="number" id="payment_amount" name="payment_amount" value="{{ ad_request.payment_amount }}"><br><br>
+
+        <label for="status">Status:</label><br>
+        <select id="status" name="status">
+            <option value="Pending" {% if ad_request.status == 'Pending' %}selected{% endif %}>Pending</option>
+            <option value="Accepted" {% if ad_request.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+            <option value="Rejected" {% if ad_request.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+        </select><br><br>
+
+        <input type="submit" value="Update">
+    </form>
+</body>
+</html>
